@@ -1,5 +1,5 @@
 # ──────────────────────────────────────────────────────────────────────────────
-# Powerlevel10k instant prompt (debe ir arriba)
+# Powerlevel10k instant prompt (debe ir arriba de todo)
 # ──────────────────────────────────────────────────────────────────────────────
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
@@ -40,7 +40,6 @@ bindkey '^[[Z'     undo
 # Completion
 # ──────────────────────────────────────────────────────────────────────────────
 autoload -Uz compinit
-# usa un dump en cache si existe
 compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump"
 
 zstyle ':completion:*' auto-description 'specify: %d'
@@ -54,7 +53,7 @@ zstyle ':completion:*' use-compctl false
 zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 
-# Colores de completion basados en LS_COLORS (se define más abajo)
+# Colores para completion desde LS_COLORS (se define más abajo)
 eval "$(dircolors -b ~/.dircolors 2>/dev/null || dircolors -b)"
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
@@ -71,7 +70,7 @@ setopt hist_verify
 alias history="history 0"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Prompt de Kali (con alternativas)
+# Prompt estilo Kali (con alternativas)
 # ──────────────────────────────────────────────────────────────────────────────
 case "$TERM" in
   xterm-color|*-256color) color_prompt=yes;;
@@ -96,7 +95,7 @@ configure_prompt() {
   esac
 }
 
-# START KALI CONFIG VARIABLES (no toques estas 2 líneas)
+# START KALI CONFIG VARIABLES
 PROMPT_ALTERNATIVE=twoline
 NEWLINE_BEFORE_PROMPT=yes
 # STOP KALI CONFIG VARIABLES
@@ -104,11 +103,6 @@ NEWLINE_BEFORE_PROMPT=yes
 if [[ "$color_prompt" = yes ]]; then
   VIRTUAL_ENV_DISABLE_PROMPT=1
   configure_prompt
-
-  # Syntax highlighting (si está instalado)
-  if [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-    . /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-  fi
 else
   PROMPT='${debian_chroot:+($debian_chroot)}%n@%m:%~%(#.#.$) '
 fi
@@ -132,7 +126,6 @@ case "$TERM" in
     TERM_TITLE=$'\e]0;${debian_chroot:+($debian_chroot)}${VIRTUAL_ENV:+($(basename $VIRTUAL_ENV))}%n@%m: %~\a'
     ;;
 esac
-
 precmd() {
   print -Pnr -- "$TERM_TITLE"
   if [[ "$NEWLINE_BEFORE_PROMPT" = yes ]]; then
@@ -145,15 +138,12 @@ precmd() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Colores ls/less/grep y alias
+# Colores y alias (ls/grep/less) + fallback si no hay lsd o batcat
 # ──────────────────────────────────────────────────────────────────────────────
-if [[ -x /usr/bin/dircolors ]]; then
-  # (ya hicimos dircolors arriba; aquí solo ajustamos extras)
-  export LS_COLORS="$LS_COLORS:ow=30;44:"  # carpetas 777
-  # Completion ya usa LS_COLORS (ver arriba)
-fi
+# Ajuste visual para dirs con 777
+export LS_COLORS="$LS_COLORS:ow=30;44:"
 
-# Alias: usa lsd si existe; si no, cae a ls con color
+# Alias ls con lsd si existe, si no usa ls
 if command -v lsd >/dev/null 2>&1; then
   alias ll='lsd -lh --group-dirs=first'
   alias la='lsd -la --group-dirs=first'
@@ -168,7 +158,7 @@ else
   alias lla='ls -lha'
 fi
 
-# cat → batcat si está disponible
+# cat→batcat si está disponible
 if command -v batcat >/dev/null 2>&1; then
   alias cat='batcat'
   alias catnl='batcat --paging=never'
@@ -183,7 +173,7 @@ alias egrep='egrep --color=auto'
 alias diff='diff --color=auto'
 alias ip='ip --color=auto'
 
-# Menos colores para man/less (si te molestan, comenta estas 6 líneas)
+# Colores para less/man (opcional)
 export LESS_TERMCAP_mb=$'\E[1;31m'
 export LESS_TERMCAP_md=$'\E[1;36m'
 export LESS_TERMCAP_me=$'\E[0m'
@@ -193,18 +183,7 @@ export LESS_TERMCAP_us=$'\E[1;32m'
 export LESS_TERMCAP_ue=$'\E[0m'
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Plugins opcionales
-# ──────────────────────────────────────────────────────────────────────────────
-[[ -f /usr/share/zsh-sudo/sudo.plugin.zsh ]] && source /usr/share/zsh-sudo/sudo.plugin.zsh
-[[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-# Powerlevel10k theme (si lo tienes clonado en ~/powerlevel10k)
-[[ -f "$HOME/powerlevel10k/powerlevel10k.zsh-theme" ]] && source "$HOME/powerlevel10k/powerlevel10k.zsh-theme"
-# Config de p10k generada por el wizard
-[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
-
-# ──────────────────────────────────────────────────────────────────────────────
-# PATH (sin duplicar y solo si existen)
+# PATH (sin duplicar, solo si existen)
 # ──────────────────────────────────────────────────────────────────────────────
 _addpath() { [[ -d "$1" && ":$PATH:" != *":$1:"* ]] && PATH="$1:$PATH"; }
 _addpath "$HOME/.local/bin"
@@ -215,28 +194,24 @@ _addpath "$HOME/go/bin"
 export PATH
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Aliases/funciones personalizadas
+# Aliases/funciones personales
 # ──────────────────────────────────────────────────────────────────────────────
-# time bonito
 TIMEFMT=$'\nreal\t%E\nuser\t%U\nsys\t%S\ncpu\t%P'
 
-# target/cleartarget (genérico)
+# target/cleartarget (genérico, sin usuario hardcodeado)
 _target_file="${XDG_CONFIG_HOME:-$HOME/.config}/bin/target/target.txt"
 mkdir -p "$(dirname "$_target_file")"
-
 target() {
   local ip_address="$1"
   local machine_name="$2"
   echo "$ip_address $machine_name" > "$_target_file"
 }
-cleartarget() {
-  : > "$_target_file"
-}
+cleartarget() { : > "$_target_file"; }
 
 # mkt: crea estructura de trabajo
 mkt() { mkdir -p nmap content exploits; }
 
-# extractPorts: puertos de un grepable nmap
+# extractPorts: saca puertos de salida grepable de nmap
 extractPorts(){
   local file="$1"
   local ports ip_address
@@ -247,11 +222,69 @@ extractPorts(){
     echo -e "\t[*] Dirección IP: $ip_address"
     echo -e "\t[*] Puertos abiertos: $ports\n"
   } | tee extractPorts.tmp >/dev/null
-  command -v xclip >/dev/null 2>&1 && printf %s "$ports" | tr -d '\n' | xclip -sel clip
-  echo -e "[*] Puertos copiados al portapapeles (si xclip está instalado)\n"
+  if command -v xclip >/dev/null 2>&1; then
+    printf %s "$ports" | tr -d '\n' | xclip -sel clip
+    echo -e "[*] Puertos copiados al portapapeles\n"
+  fi
   cat extractPorts.tmp; rm -f extractPorts.tmp
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Fin
+# Tema y plugins (orden correcto)
 # ──────────────────────────────────────────────────────────────────────────────
+# Powerlevel10k (si está instalado)
+[[ -f "$HOME/powerlevel10k/powerlevel10k.zsh-theme" ]] && source "$HOME/powerlevel10k/powerlevel10k.zsh-theme"
+# Config p10k generada por el wizard
+[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
+
+# Autosuggestions (OPCIONAL) — debe ir antes del highlighting
+if [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#999'
+fi
+
+if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+        . /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+        ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
+        ZSH_HIGHLIGHT_STYLES[default]=none
+        ZSH_HIGHLIGHT_STYLES[unknown-token]=fg=white,underline
+        ZSH_HIGHLIGHT_STYLES[reserved-word]=fg=cyan,bold
+        ZSH_HIGHLIGHT_STYLES[suffix-alias]=fg=green,underline
+        ZSH_HIGHLIGHT_STYLES[global-alias]=fg=green,bold
+        ZSH_HIGHLIGHT_STYLES[precommand]=fg=green,underline
+        ZSH_HIGHLIGHT_STYLES[commandseparator]=fg=blue,bold
+        ZSH_HIGHLIGHT_STYLES[autodirectory]=fg=green,underline
+        ZSH_HIGHLIGHT_STYLES[path]=bold
+        ZSH_HIGHLIGHT_STYLES[path_pathseparator]=
+        ZSH_HIGHLIGHT_STYLES[path_prefix_pathseparator]=
+        ZSH_HIGHLIGHT_STYLES[globbing]=fg=blue,bold
+        ZSH_HIGHLIGHT_STYLES[history-expansion]=fg=blue,bold
+        ZSH_HIGHLIGHT_STYLES[command-substitution]=none
+        ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]=fg=magenta,bold
+        ZSH_HIGHLIGHT_STYLES[process-substitution]=none
+        ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]=fg=magenta,bold
+        ZSH_HIGHLIGHT_STYLES[single-hyphen-option]=fg=green
+        ZSH_HIGHLIGHT_STYLES[double-hyphen-option]=fg=green
+        ZSH_HIGHLIGHT_STYLES[back-quoted-argument]=none
+        ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]=fg=blue,bold
+        ZSH_HIGHLIGHT_STYLES[single-quoted-argument]=fg=yellow
+        ZSH_HIGHLIGHT_STYLES[double-quoted-argument]=fg=yellow
+        ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]=fg=yellow
+        ZSH_HIGHLIGHT_STYLES[rc-quote]=fg=magenta
+        ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]=fg=magenta,bold
+        ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]=fg=magenta,bold
+        ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]=fg=magenta,bold
+        ZSH_HIGHLIGHT_STYLES[assign]=none
+        ZSH_HIGHLIGHT_STYLES[redirection]=fg=blue,bold
+        ZSH_HIGHLIGHT_STYLES[comment]=fg=black,bold
+        ZSH_HIGHLIGHT_STYLES[named-fd]=none
+        ZSH_HIGHLIGHT_STYLES[numeric-fd]=none
+        ZSH_HIGHLIGHT_STYLES[arg0]=fg=cyan
+        ZSH_HIGHLIGHT_STYLES[bracket-error]=fg=red,bold
+        ZSH_HIGHLIGHT_STYLES[bracket-level-1]=fg=blue,bold
+        ZSH_HIGHLIGHT_STYLES[bracket-level-2]=fg=green,bold
+        ZSH_HIGHLIGHT_STYLES[bracket-level-3]=fg=magenta,bold
+        ZSH_HIGHLIGHT_STYLES[bracket-level-4]=fg=yellow,bold
+        ZSH_HIGHLIGHT_STYLES[bracket-level-5]=fg=cyan,bold
+        ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]=standout
+fi
