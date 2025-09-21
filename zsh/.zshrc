@@ -237,10 +237,13 @@ extractPorts(){
 # Config p10k generada por el wizard
 [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 
-# Autosuggestions (OPCIONAL) — debe ir antes del highlighting
 if [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
   source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#999'
+fi
+
+if [ -f /usr/share/zsh-sudo/sudo.plugin.zsh ]; then
+	source /usr/share/zsh-sudo/sudo.plugin.zsh
 fi
 
 if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
